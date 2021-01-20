@@ -10,18 +10,27 @@ stdin.addListener('data', async function (url) {
 	crawl(url);
 });
 
+let phoneNumberList = [];
 const pagesToVisit = [];
 const visitedPages = {};
 var urlObject = null;
 var baseUrl = '';
-const workingDirectory = '';
+let workingDirectory = '';
 
 function getUrlDetails(stringifiedUrl) {
 	urlObject = new URL(stringifiedUrl);
 	baseUrl = urlObject.protocol + '//' + urlObject.hostname;
+	workingDirectory = getCurrentWorkingDirectory(urlObject);
 }
 
-function createUrlFromRelativePath() {}
+function getCurrentWorkingDirectory(parsedUrl) {
+	let pathName = parsedUrl.pathname;
+	return pathName.substring(0, pathName.lastIndexOf('/'));
+}
+
+function createUrlFromRelativePath(relativePath) {
+	return baseUrl + relativePath;
+}
 
 async function crawl(url) {
 	let stringifiedUrl = url + '';
@@ -31,11 +40,9 @@ async function crawl(url) {
 	while (pagesToVisit.length > 0) {
 		let currentUrl = pagesToVisit.pop();
 		if (currentUrl in visitedPages) {
-			console.log('Skipping ' + currentUrl);
 			continue;
 		} else {
 			visitedPages[currentUrl] = true;
-			console.log('Visiting ' + currentUrl);
 			try {
 				await axios
 					.get(currentUrl)
@@ -55,6 +62,7 @@ async function crawl(url) {
 			}
 		}
 	}
+	console.log(phoneNumberList);
 	console.log('Complete!');
 }
 
@@ -64,16 +72,17 @@ async function searchForPhoneNumbers($) {
 	let regex = /(?:[-+() ]*\d){10,13}/g;
 
 	const array = [...bodyText.matchAll(regex)];
-	console.log(array);
+	for (let i = 0; i < array.length; i++) {
+		phoneNumberList.push(array[i][0]);
+	}
 }
 
 function getRelativeLinksFromPage($) {
 	let relativeLinks = $('a[href]');
-	const list = [];
 	relativeLinks.each(function () {
 		let token = $(this).attr('href');
 		if (token[0] !== '/') {
-			token = '/' + token;
+			token = workingDirectory + '/' + token;
 		}
 		pagesToVisit.push(baseUrl + token);
 	});
