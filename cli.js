@@ -38,7 +38,7 @@ async function crawl(url) {
 	pagesToVisit.push(stringifiedUrl);
 
 	while (pagesToVisit.length > 0) {
-		let currentUrl = pagesToVisit.pop();
+		let currentUrl = pagesToVisit.shift();
 		if (currentUrl in visitedPages) {
 			continue;
 		} else {
