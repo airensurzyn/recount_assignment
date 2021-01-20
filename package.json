@@ -25,6 +25,7 @@
     "google-libphonenumber": "^3.2.16",
     "lodash": "^4.17.20",
     "morgan": "^1.10.0",
-    "phone-number-extractor": "^1.1.0"
+    "phone-number-extractor": "^1.1.0",
+    "url-parse": "^1.4.7"
   }
 }
