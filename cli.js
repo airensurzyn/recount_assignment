@@ -19,7 +19,6 @@ const workingDirectory = '';
 function getUrlDetails(stringifiedUrl) {
 	urlObject = new URL(stringifiedUrl);
 	baseUrl = urlObject.protocol + '//' + urlObject.hostname;
-	//baseUrl = stringifiedUrl.substring(0, stringifiedUrl.lastIndexOf('/'));
 }
 
 function createUrlFromRelativePath() {}
@@ -37,18 +36,23 @@ async function crawl(url) {
 		} else {
 			visitedPages[currentUrl] = true;
 			console.log('Visiting ' + currentUrl);
-			await axios
-				.get(currentUrl)
-				.then((response) => {
-					let $ = cheerio.load(response.data);
-					getRelativeLinksFromPage($);
-					searchForPhoneNumbers($);
-				})
-				.catch((error) => {
-					error.status = (error.response && error.response.status) || 500;
-					throw error;
-				});
-			visitedPages[currentUrl] = currentUrl;
+			try {
+				await axios
+					.get(currentUrl)
+					.then((response) => {
+						let $ = cheerio.load(response.data);
+						getRelativeLinksFromPage($);
+						searchForPhoneNumbers($);
+					})
+					.catch((error) => {
+						error.status = (error.response && error.response.status) || 500;
+						throw error;
+					});
+				visitedPages[currentUrl] = currentUrl;
+			} catch (e) {
+				//console.log(e);
+				visitedPages[currentUrl] = currentUrl;
+			}
 		}
 	}
 	console.log('Complete!');
